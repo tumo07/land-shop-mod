@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "land-shop",
+  "version": "${version}",
+  "name": "Land Shop",
+  "description": "Buy Flan claim blocks with Deepslate Coal Ore. Exchange 15x Deepslate Coal Ore for 256 claim blocks using /buylands.",
+  "authors": ["tumo07"],
+  "contact": {},
+  "license": "MIT",
+  "environment": "server",
+  "entrypoints": {
+    "server": [
+      "com.landshop.LandShopMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "fabric-api": "*",
+    "minecraft": ">=26.1",
+    "java": ">=21"
+  },
+  "suggests": {
+    "flan": "*"
+  }
+}

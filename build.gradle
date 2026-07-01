@@ -13,7 +13,10 @@ base {
 repositories {
     mavenCentral()
     maven { url = 'https://maven.fabricmc.net/' }
-    // Flan is loaded at runtime from the mods folder, no maven needed
+    maven {
+        name = "Flemmli97"
+        url = "https://maven.blazing-coop.net/releases"
+    }
 }
 
 dependencies {
@@ -25,9 +28,8 @@ dependencies {
     // Fabric API (only the modules we need)
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    // Flan mod - compile only (it will be present at runtime in the mods folder)
-    // We reference it for PlayerClaimData API access
-    compileOnly files("../mods/flan-26.1.2-1.12.7-fabric.jar")
+    // Flan mod
+    modCompileOnly "io.github.flemmli97:flan:26.1.2-1.12.7-fabric"
 }
 
 processResources {

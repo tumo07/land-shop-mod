@@ -8,7 +8,7 @@ A server-side Fabric mod for Minecraft.
 
 This mod requires the following dependencies to run properly:
 
-- **Minecraft**: `26.1.2`
+- **Minecraft Version**: `26.1.2`
 - **Java**: `26` (Due to Minecraft 26.1.2 requirements)
 - **Fabric Loader**: `>=0.16.0` (configured with `0.16.14`)
 - **Fabric API**: `0.152.1+26.1.2`

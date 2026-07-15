@@ -12,6 +12,7 @@ This mod requires the following dependencies to run properly:
 - **Java**: `26` (Due to Minecraft 26.1.2 requirements)
 - **Fabric Loader**: `>=0.16.0` (configured with `0.16.14`)
 - **Fabric API**: `0.152.1+26.1.2`
+- **Flan Mod**: `26.1.2-1.12.7-fabric` (Required at runtime for the /flan command to work)
 
 
 ## Building from Source

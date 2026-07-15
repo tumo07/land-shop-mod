@@ -6,10 +6,29 @@ echo   LandShop Mod - Direct Build (No Gradle)
 echo =============================================
 echo.
 
-set "JAVAC=C:\Program Files\Java\jdk-26.0.1\bin\javac.exe"
-set "JAR_TOOL=C:\Program Files\Java\jdk-26.0.1\bin\jar.exe"
-set "SERVER_DIR=g:\FabricServer"
-set "MOD_DIR=%SERVER_DIR%\land-shop-mod"
+:: ==========================================
+:: CONFIGURATION
+:: Modify these paths if the script cannot find them automatically.
+:: ==========================================
+set "JAVAC_PATH=C:\Program Files\Java\jdk-26.0.1\bin\javac.exe"
+set "JAR_TOOL_PATH=C:\Program Files\Java\jdk-26.0.1\bin\jar.exe"
+set "SERVER_DIR=C:\Your\Fabric\Server\Path"
+:: ==========================================
+
+if not exist "%JAVAC_PATH%" (
+    echo [Setup] Javac not found at %JAVAC_PATH%.
+    set /p JAVAC_PATH="Please enter the full path to javac.exe: "
+)
+if not exist "%JAR_TOOL_PATH%" (
+    echo [Setup] Jar tool not found at %JAR_TOOL_PATH%.
+    set /p JAR_TOOL_PATH="Please enter the full path to jar.exe: "
+)
+if not exist "%SERVER_DIR%\versions" (
+    echo [Setup] Fabric server not found at %SERVER_DIR%.
+    set /p SERVER_DIR="Please enter the path to your Fabric Server directory: "
+)
+
+set "MOD_DIR=%cd%"
 set "BUILD_DIR=%MOD_DIR%\build"
 set "CLASSES_DIR=%BUILD_DIR%\classes"
 set "OUTPUT_DIR=%BUILD_DIR%\libs"
@@ -21,55 +40,46 @@ mkdir "%OUTPUT_DIR%"
 
 REM Build classpath from server JARs
 set "CP="
-set "CP=%CP%;%SERVER_DIR%\versions\26.1.2\server-26.1.2.jar"
-set "CP=%CP%;%SERVER_DIR%\libraries\net\fabricmc\fabric-loader\0.19.3\fabric-loader-0.19.3.jar"
-set "CP=%CP%;%SERVER_DIR%\libraries\org\slf4j\slf4j-api\2.0.17\slf4j-api-2.0.17.jar"
-set "CP=%CP%;%SERVER_DIR%\libraries\com\mojang\brigadier\1.3.10\brigadier-1.3.10.jar"
-set "CP=%CP%;%SERVER_DIR%\libraries\com\mojang\authlib\9.0.75\authlib-9.0.75.jar"
-set "CP=%CP%;%SERVER_DIR%\libraries\org\jspecify\jspecify\1.0.0\jspecify-1.0.0.jar"
-set "CP=%CP%;%SERVER_DIR%\libraries\it\unimi\dsi\fastutil\8.5.18\fastutil-8.5.18.jar"
+for /R "%SERVER_DIR%\versions" %%f in (server-*.jar) do set "CP=!CP!;%%f"
+for /R "%SERVER_DIR%\libraries" %%f in (*.jar) do set "CP=!CP!;%%f"
+for /R "%SERVER_DIR%\.fabric\processedMods" %%f in (*.jar) do set "CP=!CP!;%%f"
 
-REM Add Fabric API modules from processed mods
-for %%f in ("%SERVER_DIR%\.fabric\processedMods\fabric-command-api-v2-*.jar") do set "CP=!CP!;%%f"
-for %%f in ("%SERVER_DIR%\.fabric\processedMods\fabric-api-base-*.jar") do set "CP=!CP!;%%f"
-for %%f in ("%SERVER_DIR%\.fabric\processedMods\fabric-lifecycle-events-v1-*.jar") do set "CP=!CP!;%%f"
-
-echo Classpath: %CP%
+echo Classpath configured.
 echo.
 
 REM Compile
 echo [1/3] Compiling LandShopMod.java...
-"%JAVAC%" --release 21 -cp "%CP%" -d "%CLASSES_DIR%" "%MOD_DIR%\src\main\java\com\landshop\LandShopMod.java"
+if not exist "build\classes\java\main" mkdir "build\classes\java\main"
+REM Find all java files
+dir /s /b src\main\java\*.java > sources.txt
+"%JAVAC_PATH%" -d "build\classes\java\main" -cp "%CP%" @sources.txt
+del sources.txt
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo COMPILATION FAILED!
+    echo COMPILATION FAILED
     pause
-    exit /b 1
+    exit /b %errorlevel%
 )
 
 echo [2/3] Packaging JAR...
-REM Copy fabric.mod.json to classes root
-copy "%MOD_DIR%\src\main\resources\fabric.mod.json" "%CLASSES_DIR%\fabric.mod.json" >nul
-
-REM Build the JAR
-cd /d "%CLASSES_DIR%"
-"%JAR_TOOL%" cf "%OUTPUT_DIR%\land-shop-1.0.0.jar" .
+if not exist "build\libs" mkdir "build\libs"
+"%JAR_TOOL_PATH%" cf "build\libs\land-shop-1.0.0.jar" -C "build\classes\java\main" . -C "src\main\resources" .
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo JAR PACKAGING FAILED!
+    echo PACKAGING FAILED
     pause
-    exit /b 1
+    exit /b %errorlevel%
 )
 
 echo [3/3] Installing to mods folder...
-copy /Y "%OUTPUT_DIR%\land-shop-1.0.0.jar" "%SERVER_DIR%\mods\"
+copy /Y "build\libs\land-shop-1.0.0.jar" "%SERVER_DIR%\mods\"
 
 echo.
 echo =============================================
-echo   BUILD SUCCESSFUL!
-echo   Output: %OUTPUT_DIR%\land-shop-1.0.0.jar
+echo   BUILD SUCCESSFUL
+echo   Output: %CD%\build\libs\land-shop-1.0.0.jar
 echo   Installed to: %SERVER_DIR%\mods\
 echo   Restart your server to load the mod.
 echo =============================================
